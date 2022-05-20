@@ -1,0 +1,21 @@
+import "tfplan-functions" as plan
+
+aws_standard = ["arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/1.2.0" , "arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0" ]
+
+
+# Get all Lambda
+awsSecurityHubList = plan.find_resources("aws_securityhub_standards_subscription")
+
+violatingSecurityhub = 0 
+
+for awsSecurityHubList as awsSecurityHubName, Obj {
+    if Obj.change.after.standards_arn else null is null or 
+    ( Obj.change.after.standards_arn not in aws_standard ) {
+        violatingSecurityhub +=1
+        print("Error: Aws Securityhub Standards Violation - ",awsSecurityHubName )
+    }  
+}
+
+main = rule {
+    violatingSecurityhub is 0
+}
